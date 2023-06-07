@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sathguru/pages/signup_page.dart';
 import 'package:toast/toast.dart';
@@ -9,6 +11,7 @@ import '../common/toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manager/data_base/db_manager.dart';
 import '../model/login/login_response.dart';
+import 'home_screen.dart';
 
 class LoginPage extends StatefulWidget{
 
@@ -16,7 +19,6 @@ class LoginPage extends StatefulWidget{
 }
 class LoginPageState extends State<LoginPage>{
   Future<SharedPreferences> _pref = SharedPreferences.getInstance();
-  final _formKey = new GlobalKey<FormState>();
   FocusNode _passwordFocus = FocusNode();
   TextEditingController userNameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -38,10 +40,10 @@ class LoginPageState extends State<LoginPage>{
       await dbManager.getLoginUser(userName, passwd).then((userData) {
         if (userData != null) {
           setSP(userData).whenComplete(() {
-            // Navigator.pushAndRemoveUntil(
-            //     context,
-            //     MaterialPageRoute(builder: (_) => HomeScreen()),
-            //         (Route<dynamic> route) => false);
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => HomeScreen()),
+                    (route) => false);
           });
         } else {
           ToastMessage("Error: User Not Found");
@@ -55,10 +57,9 @@ class LoginPageState extends State<LoginPage>{
 
   Future setSP(UserModel user) async {
     final SharedPreferences sp = await _pref;
-    sp.setString("user_id", user.user_id!);
-    sp.setString("user_name", user.user_name!);
-    sp.setString("email", user.email!);
-    sp.setString("password", user.password!);
+    sp.setString("user_data", json.encode(user));
+
+
   }
   @override
   Widget build(BuildContext context) {

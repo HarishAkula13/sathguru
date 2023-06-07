@@ -2,11 +2,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:io' as io;
+import '../../common/logger/logger.dart';
 import '../../model/login/login_response.dart';
 
 class DbManager {
   static Database? _db;
-
+  UserModel? _user;
   static const String DB_Name = 'test.db';
   static const String Table_User = 'user';
   static const int Version = 1;
@@ -49,10 +50,9 @@ class DbManager {
 
   Future<int> saveData(UserModel user) async {
     var dbClient = await db;
-    var res = await dbClient.insert(Table_User, user.toMap());
+    var res = await dbClient.insert(Table_User, user.toJson());
     return res;
   }
-
   Future<UserModel?> getLoginUser(String userId, String password) async {
     var dbClient = await db;
     var res = await dbClient.rawQuery("SELECT * FROM $Table_User WHERE "
@@ -60,23 +60,60 @@ class DbManager {
         "$C_Password = '$password'");
 
     if (res.length > 0) {
-      return UserModel.fromMap(res.first);
+      return UserModel.fromJson(res.first);
     }
 
     return null;
   }
+  Future<int> insert<T>(Map<String, dynamic> row) async {
+    printLog("SQLFLITE:: data insert : ",row);
+    final db = await _db;
 
-  Future<int> updateUser(UserModel user) async {
-    var dbClient = await db;
-    var res = await dbClient.update(Table_User, user.toMap(),
-        where: '$C_UserID = ?', whereArgs: [user.user_id]);
-    return res;
+    final result = db!.insert(T.toString(), row);
+
+    result.catchError((e) {
+      printLog("SQLFLITE:: Error on insert", e.toString());
+    });
+
+    return result;
   }
 
-  Future<int> deleteUser(String user_id) async {
-    var dbClient = await db;
-    var res = await dbClient
-        .delete(Table_User, where: '$C_UserID = ?', whereArgs: [user_id]);
-    return res;
+  Future<List<Map<String, dynamic>>> queryAllRows<T>() async {
+    Database? db = await _db;
+
+    final result = db!.query(T.toString());
+
+    result.catchError((e) {
+      printLog("SQLFLITE:: Error on query", e.toString());
+    });
+
+    return result;
+  }
+
+  Future<int> update<T>(Map<String, dynamic> row) async {
+    print("data update:$row");
+    Database? db = await _db;
+    String usersid = row['user_id'].toString();
+
+    final result =
+    db!.update(T.toString(), row, where: '$usersid = ?', whereArgs: [usersid]);
+
+    result.catchError((e) {
+      printLog("SQLFLITE:: Error on update", e.toString());
+    });
+
+    return result;
+  }
+
+  Future<int> delete<T>() async {
+    final db = await _db;
+
+    final result = db!.delete(T.toString());
+
+    result.catchError((e) {
+      printLog("SQLFLITE:: Error on delete all", e.toString());
+    });
+
+    return result;
   }
 }

@@ -15,9 +15,11 @@ class SignUpPage extends StatefulWidget{
 class SignUpPageState extends State<SignUpPage>{
   final _formKey = new GlobalKey<FormState>();
   TextEditingController userNameController = TextEditingController();
-  TextEditingController mobileNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController dobController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController salaryController = TextEditingController();
   var dbManager;
 
   @override
@@ -27,10 +29,15 @@ class SignUpPageState extends State<SignUpPage>{
   }
   signUp() async {
     String uid = userNameController.text;
-    String uname = mobileNumberController.text;
+    String uname = userNameController.text;
     String email = emailController.text;
     String passwd = passwordController.text;
-    UserModel uModel = UserModel(uid, uname, email, passwd);
+    String address = addressController.text;
+    String dob = dobController.text;
+    String salary = salaryController.text;
+
+
+    UserModel uModel = UserModel(uid, uname, email, passwd,address,dob,salary);
     await dbManager.saveData(uModel).then((userData) {
       ToastMessage("Successfully Saved");
 
@@ -95,14 +102,7 @@ class SignUpPageState extends State<SignUpPage>{
                   inputAction: TextInputAction.next,
                   keyboardType: TextInputType.text,
                 ),
-                const SizedBox(height: 20,),
-                UserTextField(
-                  controller: mobileNumberController,
-                  labelText: 'Mobile Number',
-                  hintText: '',
-                  inputAction: TextInputAction.next,
-                  keyboardType: TextInputType.number,
-                ),
+
                 const SizedBox(height: 20,),
                 UserTextField(
                   controller:emailController ,
@@ -116,8 +116,32 @@ class SignUpPageState extends State<SignUpPage>{
                   controller: passwordController,
                   labelText: 'Password',
                   hintText: '',
-                  inputAction: TextInputAction.done,
+                  inputAction: TextInputAction.next,
                   keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 20,),
+                UserTextField(
+                  controller: dobController,
+                  labelText: 'DOB',
+                  hintText: '',
+                  inputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 20,),
+                UserTextField(
+                  controller: addressController,
+                  labelText: 'Address',
+                  hintText: '',
+                  inputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                ),
+                const SizedBox(height: 20,),
+                UserTextField(
+                  controller: salaryController,
+                  labelText: 'Salary',
+                  hintText: '',
+                  inputAction: TextInputAction.done,
+                  keyboardType: TextInputType.number,
                 ),
 
                 const SizedBox(
